@@ -33,25 +33,15 @@ config = {}
 # identify database
 config['database'] = 'sfmc'
 
-# identify a working storage path in DBFS to ensure you can run this notebook without setting up external storage accounts; in real usage please use a storage account 
-config['working storage path'] = '/tmp/tracking'
-
-# source data arrives at a cloud storage 
-config['source dir'] = "s3://db-gtm-industry-solutions/data/rcg/sfmc/"
+# identify moint point
+config['mount point'] = '/mnt/tracking'
 
 # identify key folder locations
-config['incoming dir'] = f"{config['working storage path']}/incoming"
+config['incoming dir'] = f"{config['mount point']}/incoming"
 config['temp dir'] = f"{config['incoming dir']}/temp"
 config['inprocess dir']  = f"{config['incoming dir']}/inprocess"
-config['archive dir'] = f"{config['working storage path']}/archive"
-config['raw dir'] = f"{config['working storage path']}/raw"
-
-# COMMAND ----------
-
-# DBTITLE 1,Initialize working directory with source files
-dbutils.fs.rm(config['working storage path'], True)
-dbutils.fs.mkdirs(config['incoming dir'])
-dbutils.fs.cp(config['source dir'], config['incoming dir'], True)
+config['archive dir'] = f"{config['mount point']}/archive"
+config['raw dir'] = f"{config['mount point']}/raw"
 
 # COMMAND ----------
 
@@ -71,11 +61,10 @@ _ = spark.catalog.setCurrentDatabase(config['database'])
 # MAGIC <img src='https://brysmiwasb.blob.core.windows.net/demos/images/sfmc_extract_1.png' width=750>
 # MAGIC </p>
 # MAGIC 
-# MAGIC And that daily extract is sending files to the *source* folder of an cloud storage account accessible to Databricks. The image below illustrates the connection screen for an Azure Blob Storage. We then make a copy of the data to the *incoming* folder in the working directory in [DBFS](https://docs.databricks.com/dbfs/index.html) in order to show how we process and transform the data. In practice, most production data pipelines will save outputs in storage accounts, not DBFS. 
+# MAGIC And that daily extract is sending files to the *incoming* folder of an Azure Storage account accessible to Databricks as a [mount point](https://learn.microsoft.com/en-us/azure/databricks/dbfs/mounts) that Databricks will recognize as */mnt/tracking* within its filesystem (not shown here):
 # MAGIC </p>
 # MAGIC 
 # MAGIC <img src='https://brysmiwasb.blob.core.windows.net/demos/images/sfmc_extract_23.png' width=750>
-# MAGIC 
 # MAGIC 
 # MAGIC The data are extracted as a compressed ZIP file named **SMFC_Tracking_Extract_*MM-DD-YYYY*.zip** where the *MM*, *DD* and *YYYY* parts of the name represent the month, day and year of the extract, respectively.  Within each zip file are CSV files containing data about the sending jobs and events associated with these.  The CSV files, one for each event type associated with the extract and one for the sending jobs, are named as follows:</p>
 # MAGIC 
@@ -94,21 +83,16 @@ _ = spark.catalog.setCurrentDatabase(config['database'])
 # MAGIC </p>
 # MAGIC 
 # MAGIC ```
-# MAGIC /<working storage path>
-# MAGIC    /incoming
-# MAGIC       /temp
-# MAGIC       /inprocess
-# MAGIC    /archive
-# MAGIC    /raw
+# MAGIC /incoming
+# MAGIC    /temp
+# MAGIC    /inprocess
+# MAGIC /archive
+# MAGIC /raw
 # MAGIC ```
 # MAGIC 
 # MAGIC In this folder structure, the *raw* folder is where processed data files will reside.  Subfolders under it will identify various event types and the processed files for those event types, *i.e.* *sent*, *open*, *click*, *etc.*, will be placed in its associated subfolder. In the standard [medallion architecture](https://www.databricks.com/glossary/medallion-architecture#:~:text=A%20medallion%20architecture%20is%20a,Silver%20%E2%87%92%20Gold%20layer%20tables) employed in many lakehouse implementations, this will represent our Bronze layer. The *archive* folder is where processed ZIP files will be placed once *inprocess* data has been fully processed and files are transferred to *raw*.
 # MAGIC 
 # MAGIC The logic for the unzipping, renaming, and staging of files from the *incoming* folder to the *inprocess* subfolder is provided here:
-
-# COMMAND ----------
-
-dbutils.fs.ls(config['incoming dir'])
 
 # COMMAND ----------
 
@@ -124,7 +108,7 @@ def list_folder_contents(path, level=0):
     if file.size==0:
       list_folder_contents(file.path, level+1)
       
-list_folder_contents(config['working storage path'])
+list_folder_contents(config['mount point'])
 
 # COMMAND ----------
 
@@ -173,7 +157,7 @@ for i in dbutils.fs.ls(config['incoming dir']):
 # COMMAND ----------
 
 # DBTITLE 1,Display Ending Folder Structure
-list_folder_contents('/tmp/tracking')   
+list_folder_contents('/mnt/tracking')   
 
 # COMMAND ----------
 
