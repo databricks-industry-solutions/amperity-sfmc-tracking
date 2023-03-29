@@ -1,7 +1,7 @@
 # Databricks notebook source
 # MAGIC %md The purpose of this notebook is to process Salesforce Marketing Cloud (email) tracking extracts in preparation for publication of summary metrics to the Amperity platform. This notebook was developed on a **Databricks 11.3 LTS** cluster.
 # MAGIC 
-# MAGIC You may find this notebook at https://github.com/databricks-industry-solutions/amperity-sfmc-tracking
+# MAGIC You may find this notebook at https://github.com/databricks-industry-solutions/amperity-sfmc-tracking.
 
 # COMMAND ----------
 
@@ -48,6 +48,7 @@ config['raw dir'] = f"{config['working storage path']}/raw"
 
 # COMMAND ----------
 
+# DBTITLE 1,Initialize working directory with source files
 dbutils.fs.rm(config['working storage path'], True)
 dbutils.fs.mkdirs(config['incoming dir'])
 dbutils.fs.cp(config['source dir'], config['incoming dir'], True)
@@ -70,10 +71,11 @@ _ = spark.catalog.setCurrentDatabase(config['database'])
 # MAGIC <img src='https://brysmiwasb.blob.core.windows.net/demos/images/sfmc_extract_1.png' width=750>
 # MAGIC </p>
 # MAGIC 
-# MAGIC And that daily extract is sending files to the *incoming* folder of an Azure Storage account accessible to Databricks as a [working storage path](https://learn.microsoft.com/en-us/azure/databricks/dbfs/mounts) that Databricks will recognize as */tmp/tracking* within its filesystem (not shown here):
+# MAGIC And that daily extract is sending files to the *source* folder of an cloud storage account accessible to Databricks. The image below illustrates the connection screen for an Azure Blob Storage. We then make a copy of the data to the *incoming* folder in the working directory in [DBFS](https://docs.databricks.com/dbfs/index.html) in order to show how we process and transform the data. In practice, most production data pipelines will save outputs in storage accounts, not DBFS. 
 # MAGIC </p>
 # MAGIC 
 # MAGIC <img src='https://brysmiwasb.blob.core.windows.net/demos/images/sfmc_extract_23.png' width=750>
+# MAGIC 
 # MAGIC 
 # MAGIC The data are extracted as a compressed ZIP file named **SMFC_Tracking_Extract_*MM-DD-YYYY*.zip** where the *MM*, *DD* and *YYYY* parts of the name represent the month, day and year of the extract, respectively.  Within each zip file are CSV files containing data about the sending jobs and events associated with these.  The CSV files, one for each event type associated with the extract and one for the sending jobs, are named as follows:</p>
 # MAGIC 
