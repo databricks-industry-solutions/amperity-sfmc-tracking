@@ -3,7 +3,7 @@
 [![CLOUD](https://img.shields.io/badge/CLOUD-ALL-blue?logo=googlecloud&style=for-the-badge)](https://cloud.google.com/databricks)
 [![POC](https://img.shields.io/badge/POC-10_days-green?style=for-the-badge)](https://databricks.com/try-databricks)
 
-## Business Problem
+## Use Case
 In this notebook, we will process daily extracts of tracking data originating from email-based customer marketing campaigns orchestrated through the Salesforce Marketing Cloud (SFMC).  Data from these campaigns are very useful for managing future marketing engagement efforts, making them a valuable input to customer data platform (CDP) systems through which these efforts are managed.
 
 The challenge with these data are that they are organized around the scheduled unit of work executed in the SFMC system and not necessarily the customer to whom the email messages are being sent.  The data can be quite voluminous, depending on how jobs are configured, so that organizations will typically want to  restructure and aggregate information from the larger email tracking dataset to align it with the needs of CDP and the marketers that use it.
