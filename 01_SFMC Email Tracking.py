@@ -1,7 +1,5 @@
 # Databricks notebook source
 # MAGIC %md The purpose of this notebook is to process Salesforce Marketing Cloud (email) tracking extracts in preparation for publication of summary metrics to the Amperity platform. This notebook was developed on a **Databricks 11.3 LTS** cluster.
-# MAGIC 
-# MAGIC You may find this notebook at https://github.com/databricks-industry-solutions/amperity-sfmc-tracking.
 
 # COMMAND ----------
 
@@ -157,7 +155,7 @@ for i in dbutils.fs.ls(config['incoming dir']):
 # COMMAND ----------
 
 # DBTITLE 1,Display Ending Folder Structure
-list_folder_contents('/mnt/tracking')   
+list_folder_contents('/mnt/tracking')
 
 # COMMAND ----------
 
@@ -477,11 +475,15 @@ dbutils.fs.mv(config['inprocess dir'], config['raw dir'], recurse=True)
 
 # COMMAND ----------
 
+# MAGIC %md **NOTE** Because this notebook is a demonstration, we will leave the ZIP files in place for the next run.
+
+# COMMAND ----------
+
 # DBTITLE 1,Archive Zip Files
-# for each zip file
-for zf in zips_to_archive:
-  # move it to archive folder
-  dbutils.fs.mv(zf, f"{config['archive dir']}/{zf.split('/')[-1]}")
+## for each zip file
+#for zf in zips_to_archive:
+#  # move it to archive folder
+#  dbutils.fs.mv(zf, f"{config['archive dir']}/{zf.split('/')[-1]}")
 
 # COMMAND ----------
 
